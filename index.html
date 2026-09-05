@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Profile Finder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .container {
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #58a6ff;
+    }
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+    input {
+      flex: 1;
+      padding: 10px 14px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+    input:focus {
+      border-color: #58a6ff;
+    }
+    button {
+      padding: 10px 16px;
+      background: #238636;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2ea043;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      display: none;
+    }
+    .card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid #58a6ff;
+      margin-bottom: 12px;
+    }
+    .card h3 {
+      color: #f0f6fc;
+      margin-bottom: 4px;
+    }
+    .card p {
+      color: #8b949e;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      background: #0d1117;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .stats div span {
+      display: block;
+      font-size: 0.8rem;
+      color: #8b949e;
+    }
+    .stats div strong {
+      color: #58a6ff;
+    }
+    .profile-link {
+      display: inline-block;
+      text-decoration: none;
+      color: #58a6ff;
+      font-weight: 600;
+      border: 1px solid #30363d;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+    .profile-link:hover {
+      background: #30363d;
+    }
+    .error-msg {
+      color: #f85149;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>GitHub Finder</h2>
+    <div class="search-box">
+      <input type="text" id="usernameInput" placeholder="Enter GitHub username...">
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <div id="errorMsg" class="error-msg">User not found. Try another!</div>
+
+    <div id="profileCard" class="card">
+      <img id="avatar" src="" alt="Avatar">
+      <h3 id="name">Name</h3>
+      <p id="bio">Bio description will appear here...</p>
+      <div class="stats">
+        <div>
+          <span>Repos</span>
+          <strong id="repos">0</strong>
+        </div>
+        <div>
+          <span>Followers</span>
+          <strong id="followers">0</strong>
+        </div>
+        <div>
+          <span>Following</span>
+          <strong id="following">0</strong>
+        </div>
+      </div>
+      <a id="profileUrl" href="#" target="_blank" class="profile-link">View Full Profile</a>
+    </div>
+  </div>
+
+  <script>
+    const searchBtn = document.getElementById('searchBtn');
+    const usernameInput = document.getElementById('usernameInput');
+    const profileCard = document.getElementById('profileCard');
+    const errorMsg = document.getElementById('errorMsg');
+
+    async function fetchGitHubUser() {
+      const username = usernameInput.value.trim();
+      if (!username) return;
+
+      errorMsg.style.display = 'none';
+      profileCard.style.display = 'none';
+
+      try {
+        const response = await fetch(`https://api.github.com/users/${username}`);
+        
+        if (!response.ok) {
+          throw new Error('User not found');
+        }
+
+        const data = await response.json();
+
+        document.getElementById('avatar').src = data.avatar_url;
+        document.getElementById('name').textContent = data.name || data.login;
+        document.getElementById('bio').textContent = data.bio || 'No bio available';
+        document.getElementById('repos').textContent = data.public_repos;
+        document.getElementById('followers').textContent = data.followers;
+        document.getElementById('following').textContent = data.following;
+        document.getElementById('profileUrl').href = data.html_url;
+
+        profileCard.style.display = 'block';
+      } catch (err) {
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    searchBtn.addEventListener('click', fetchGitHubUser);
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') fetchGitHubUser();
+    });
+  </script>
+</body>
+</html>
